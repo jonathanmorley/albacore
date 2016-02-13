@@ -51,9 +51,9 @@ module Albacore
         # if the symbols flag is set and there's a symbols file specified
         # then run NuGet.exe to generate the .symbols.nupkg file
         if nuspec_symbols_file
-          pars = original_pars.dup 
-          pars << '-Symbols' 
-          pars << nuspec_symbols_file 
+          pars = original_pars.dup
+          pars << '-Symbols'
+          pars << nuspec_symbols_file
           spkg = with_subterfuge pkg do
             get_nuget_path_of do
               system @executable, pars, :work_dir => @work_dir
@@ -74,11 +74,11 @@ module Albacore
       # regexpes the package path from the output
       def get_nuget_path_of
         out = yield
-        out.match /Successfully created package '([:\s\p{Word}\\\/\d\.\-]+\.symbols\.nupkg)'./iu if out.respond_to? :match
+        out.match(/Successfully created package '([:\s\p{Word}\\\/\d\.\-]+\.symbols\.nupkg)'./iu) if out.respond_to? :match
         trace "Got symbols return value: '#{out}', matched: '#{$1}'" if $1
         return $1 if $1
 
-        out.match /Successfully created package '([:\s\p{Word}\\\/\d\.\-]+\.nupkg)'./iu if out.respond_to? :match
+        out.match(/Successfully created package '([:\s\p{Word}\\\/\d\.\-]+\.nupkg)'./iu) if out.respond_to? :match
         trace "Got NOT-symbols return value: '#{out}', matched: '#{$1}'"
 
         unless $1
@@ -107,7 +107,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         res
       end
     end
-    
+
     # This tasktype allows you to quickly package project files to nuget
     # packages.
     #
@@ -149,6 +149,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         @project_dependencies = true
         @nuget_dependencies = true
         @leave_nuspec = false
+        @use_paket = true
         fill_required
       end
 
@@ -185,6 +186,12 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         @nuget_dependencies = false
       end
 
+      # Call this if you want to use the legacy NuGet.exe infrastructure instead
+      # of the more modern Paket infrastructure
+      def use_legacy_exe
+        @use_paket = false
+      end
+
       def nuget_gem_exe
         @exe = Albacore::Nugets::find_nuget_gem_exe
       end
@@ -194,7 +201,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         files = @files.respond_to?(:each) ? @files : [@files]
 
         [:authors, :description, :version].each do |required|
-          warn "metadata##{required} is missing from nugets_pack [nugets pack: config]" if @package.metadata.send(required) == 'MISSING' 
+          warn "metadata##{required} is missing from nugets_pack [nugets pack: config]" if @package.metadata.send(required) == 'MISSING'
         end
 
         Map.new({
@@ -203,7 +210,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
           :symbols       => @symbols,
           :package       => @package,
           :target        => @target,
-          :files         => @files,
+          :files         => files,
           :configuration => @configuration,
           :project_dependencies => @project_dependencies,
           :nuget_dependencies => @nuget_dependencies,
@@ -308,7 +315,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         target = @opts.get :target
 
         trace "creating NON-SYMBOL package for '#{proj.name}', targeting '#{target}' [nugets pack: task]"
-        nuspec = Albacore::NugetModel::Package.from_xxproj proj, 
+        nuspec = Albacore::NugetModel::Package.from_xxproj proj,
           symbols:        false,
           verify_files:   true,
           dotnet_version: target,
@@ -389,14 +396,14 @@ and report a bug to albacore with the full output. Here's the nuget process outp
           :nuspec   => nuspec,
           :nupkg    => nuget,
           :location => nuget
-        ) 
+        )
       end
 
       def self.accept? f
         File.extname(f).downcase != '.nuspec'
       end
     end
-    
+
     # generate a nuget from a nuspec
     class NuspecTask
       include Logging
