@@ -82,6 +82,7 @@ module Albacore
           end
 
           task :nuget_push => @opts.get(:depend_on) do
+            p packages
             packages.each do |package|
               nuget_push package
             end
@@ -178,7 +179,6 @@ module Albacore
           @block.call(package) if @block
           return package
         end
-        p @packages
         @packages
       end
 
