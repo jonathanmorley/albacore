@@ -98,12 +98,12 @@ module Albacore
       end
 
       def nuget_push package, package_opts
-        exe     = package_opts.get :nuget_exe
-        api_key = package_opts.get :api_key
+        exe     = package_opts[:nuget_exe]
+        api_key = package_opts[:api_key]
         params = %W|push #{package}|
         params << api_key if api_key
-        params << %W|-Source #{package_opts.get :nuget_source}|
-        system exe, params, clr_command: package_opts.get(:clr_command)
+        params << %W|-Source #{package_opts[:nuget_source]}|
+        system exe, params, clr_command: package_opts[:clr_command])
       end
 
       def git_push
@@ -161,9 +161,9 @@ module Albacore
 
       def packages
         defaults = {
-          nuget_source: @nuget_source,
-          api_key: @api_key,
-          clr_command: @clr_command
+          nuget_source: @opts.get :nuget_source,
+          api_key: @opts.get :api_key,
+          clr_command: @opts.get :clr_command
         }
         
         # only read packages once
