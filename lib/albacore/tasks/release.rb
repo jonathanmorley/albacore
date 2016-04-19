@@ -167,13 +167,13 @@ module Albacore
         
         packages = Dir.glob(pathspec).map do |path|
           id = /(?<id>.*)\.#{nuget_version}/.match(File.basename(path, '.nupkg'))[:id]
-          @block.call {
+          @block.call({
             path: path,
             id_version: IDVersion.new id, nuget_version,
             nuget_source: @opts.get(:nuget_source),
             api_key: @opts.get(:api_key),
             clr_command: @opts.get(:clr_command)
-          }
+          })
         end
         
         @packages ||= packages
