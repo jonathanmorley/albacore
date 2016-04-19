@@ -103,7 +103,7 @@ module Albacore
         params = %W|push #{package}|
         params << api_key if api_key
         params << %W|-Source #{package_opts[:nuget_source]}|
-        system exe, params, clr_command: package_opts[:clr_command])
+        system exe, params, clr_command: package_opts[:clr_command]
       end
 
       def git_push
