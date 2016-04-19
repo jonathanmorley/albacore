@@ -138,7 +138,7 @@ module Albacore
       end
 
       def clean?
-        gd = run('git diff')
+        gd = run('git diff --exit-code')
         p gd
         gd[1] == 0
       end
