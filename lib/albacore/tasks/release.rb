@@ -169,7 +169,7 @@ module Albacore
           id = /(?<id>.*)\.#{nuget_version}/.match(File.basename(path, '.nupkg'))[:id]
           @block.call({
             path: path,
-            id_version: Albacore::NugetModel::IDVersion.new(id, nuget_version),
+            id_version: Albacore::NugetModel::IdVersion.new(id, nuget_version),
             nuget_source: @opts.get(:nuget_source),
             api_key: @opts.get(:api_key),
             clr_command: @opts.get(:clr_command)
