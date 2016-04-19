@@ -34,7 +34,7 @@ module Albacore
       include ::Rake::DSL
       include ::Albacore::DSL
 
-      def initialize name = :release, opts = {}
+      def initialize name = :release, opts = {}, &block
         @name = name
         @opts = Map.new(opts).apply \
           pkg_dir:      'build/pkg',
@@ -44,6 +44,7 @@ module Albacore
           depend_on:    :versioning,
           semver:       nil
         semver = @opts.get :semver
+        @block = block if block_given?
 
         unless semver
           ::Albacore.subscribe :build_version do |data|
@@ -80,8 +81,8 @@ module Albacore
           end
 
           task :nuget_push => @opts.get(:depend_on) do
-            packages.each do |package|
-              nuget_push package
+            packages(@block).each do |package, opts|
+              nuget_push package, opts
             end
           end
         end
@@ -96,13 +97,13 @@ module Albacore
         sh(*cmd, &block)
       end
 
-      def nuget_push package
-        exe     = @opts.get :nuget_exe
-        api_key = @opts.get :api_key
+      def nuget_push package, package_opts
+        exe     = package_opts.get :nuget_exe
+        api_key = package_opts.get :api_key
         params = %W|push #{package}|
         params << api_key if api_key
-        params << %W|-Source #{@opts.get :nuget_source}|
-        system exe, params, clr_command: @opts.get(:clr_command)
+        params << %W|-Source #{package_opts.get :nuget_source}|
+        system exe, params, clr_command: package_opts.get(:clr_command)
       end
 
       def git_push
@@ -158,11 +159,22 @@ module Albacore
         Albacore::Tasks::Versionizer.format_nuget @semver
       end
 
-      def packages
+      def packages package_block
+        defaults = {
+          nuget_source: @nuget_source,
+          api_key: @api_key,
+          clr_command: @clr_command
+        }
+        
         # only read packages once
-        path = "#{@opts.get :pkg_dir}/*.#{nuget_version}.nupkg"
-        debug { "[release] looking for packages in #{path}, version #{@semver}" }
-        @packages ||= Dir.glob path
+        pathspec = "#{@opts.get :pkg_dir}/*.#{nuget_version}.nupkg"
+        debug { "[release] looking for packages in #{pathspec}, version #{@semver}" }
+        
+        packages = Hash.new
+        Dir.glob(pathspec).map { |path| packages[path] = defaults }
+        packages.each { |package, opts| opts = package_block.call(package, opts) }
+        
+        @packages ||= packages
         @packages
       end
 
