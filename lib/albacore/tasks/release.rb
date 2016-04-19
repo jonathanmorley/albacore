@@ -82,8 +82,8 @@ module Albacore
           end
 
           task :nuget_push => @opts.get(:depend_on) do
-            packages.each do |package, opts|
-              nuget_push package, opts
+            packages.each do |package|
+              nuget_push package
             end
           end
         end
@@ -98,13 +98,13 @@ module Albacore
         sh(*cmd, &block)
       end
 
-      def nuget_push package, package_opts
+      def nuget_push package
         exe     = @opts.get :nuget_exe
-        api_key = package_opts[:api_key]
-        params = %W|push #{package}|
+        api_key = package[:api_key]
+        params = %W|push #{package[:path]}|
         params << api_key if api_key
-        params << %W|-Source #{package_opts[:nuget_source]}|
-        system exe, params, clr_command: package_opts[:clr_command]
+        params << %W|-Source #{package[:nuget_source]}|
+        system exe, params, clr_command: package[:clr_command]
       end
 
       def git_push
