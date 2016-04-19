@@ -2,6 +2,7 @@ require 'rake'
 require 'albacore/dsl'
 require 'albacore/tasks/versionizer'
 require 'map'
+require 'albacore/nuget_model'
 
 module Albacore
   module Tasks
@@ -160,19 +161,20 @@ module Albacore
       end
 
       def packages
-        defaults = {
-          nuget_source: @opts.get(:nuget_source),
-          api_key: @opts.get(:api_key),
-          clr_command: @opts.get(:clr_command)
-        }
-        
         # only read packages once
         pathspec = "#{@opts.get :pkg_dir}/*.#{nuget_version}.nupkg"
         debug { "[release] looking for packages in #{pathspec}, version #{@semver}" }
         
-        packages = Hash.new
-        Dir.glob(pathspec).map { |path| packages[path] = defaults }
-        packages.each { |package, opts| opts = @block.call(package, opts) }
+        packages = Dir.glob(pathspec).map do |path|
+          id = /(?<id>.*)\.#{nuget_version}/.match(File.basename(path, '.nupkg'))[:id]
+          @block.call {
+            path: path,
+            id_version: IDVersion.new id, nuget_version
+            nuget_source: @opts.get(:nuget_source),
+            api_key: @opts.get(:api_key),
+            clr_command: @opts.get(:clr_command)
+          }
+        end
         
         @packages ||= packages
         @packages
