@@ -178,6 +178,7 @@ module Albacore
           return package
         end
         
+        p packages
         @packages ||= packages
         @packages
       end
