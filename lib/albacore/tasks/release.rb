@@ -137,10 +137,7 @@ module Albacore
       end
 
       def committed?
-        gdi = run('git status --porcelain')
-        p gdi
-        p gdi.inspect
-        gdi[0] == ""
+        run('git status --porcelain', silent: true)[0] == ""
       end
 
       def tag_version
