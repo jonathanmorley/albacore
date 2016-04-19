@@ -138,11 +138,15 @@ module Albacore
       end
 
       def clean?
-        run('git diff --exit-code')[1] == 0
+        gd = run('git diff --exit-code')
+        p gd
+        gd[1] == 0
       end
 
       def committed?
-        run('git diff-index --cached HEAD')[1] == 0
+        gdi = run('git diff-index --cached HEAD')
+        p gdi
+        gdi[1] == 0
       end
 
       def tag_version
