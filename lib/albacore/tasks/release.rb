@@ -178,6 +178,7 @@ module Albacore
           @block.call(package) if @block
           return package
         end
+        p @packages
         @packages
       end
 
