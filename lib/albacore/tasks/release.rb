@@ -161,9 +161,9 @@ module Albacore
 
       def packages
         defaults = {
-          nuget_source: @opts.get :nuget_source,
-          api_key: @opts.get :api_key,
-          clr_command: @opts.get :clr_command
+          nuget_source: @opts.get(:nuget_source),
+          api_key: @opts.get(:api_key),
+          clr_command: @opts.get(:clr_command)
         }
         
         # only read packages once
