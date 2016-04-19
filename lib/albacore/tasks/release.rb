@@ -98,7 +98,7 @@ module Albacore
       end
 
       def nuget_push package, package_opts
-        exe     = package_opts[:nuget_exe]
+        exe     = @opts.get :nuget_exe
         api_key = package_opts[:api_key]
         params = %W|push #{package}|
         params << api_key if api_key
