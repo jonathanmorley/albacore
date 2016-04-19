@@ -81,7 +81,7 @@ module Albacore
           end
 
           task :nuget_push => @opts.get(:depend_on) do
-            packages(@block).each do |package, opts|
+            packages.each do |package, opts|
               nuget_push package, opts
             end
           end
@@ -159,7 +159,7 @@ module Albacore
         Albacore::Tasks::Versionizer.format_nuget @semver
       end
 
-      def packages package_block
+      def packages
         defaults = {
           nuget_source: @nuget_source,
           api_key: @api_key,
@@ -172,7 +172,7 @@ module Albacore
         
         packages = Hash.new
         Dir.glob(pathspec).map { |path| packages[path] = defaults }
-        packages.each { |package, opts| opts = package_block.call(package, opts) }
+        packages.each { |package, opts| opts = @block.call(package, opts) }
         
         @packages ||= packages
         @packages
