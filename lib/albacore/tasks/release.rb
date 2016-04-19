@@ -165,18 +165,18 @@ module Albacore
         pathspec = "#{@opts.get :pkg_dir}/*.#{nuget_version}.nupkg"
         debug { "[release] looking for packages in #{pathspec}, version #{@semver}" }
         
-        packages = Dir.glob(pathspec).map do |path|
+        @packages ||= Dir.glob(pathspec).map do |path|
           id = /(?<id>.*)\.#{nuget_version}/.match(File.basename(path, '.nupkg'))[:id]
-          @block.call({
+          package = {
             path: path,
             id_version: Albacore::NugetModel::IdVersion.new(id, nuget_version),
             nuget_source: @opts.get(:nuget_source),
             api_key: @opts.get(:api_key),
             clr_command: @opts.get(:clr_command)
-          })
+          }
+          @block.call(package) if @block
+          return package
         end
-        
-        @packages ||= packages
         @packages
       end
 
