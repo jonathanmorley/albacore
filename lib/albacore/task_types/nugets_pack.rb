@@ -42,6 +42,7 @@ module Albacore
 
         pars = original_pars.dup
         pars << nuspec_file
+        pars << '-NoPackageAnalysis' unless @opts.get :package_analysis
         pkg = get_nuget_path_of do
           system @executable, pars, :work_dir => @work_dir
         end
@@ -148,6 +149,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         @symbols = false
         @project_dependencies = true
         @nuget_dependencies = true
+        @package_analysis = true
         @leave_nuspec = false
         fill_required
       end
@@ -184,6 +186,12 @@ and report a bug to albacore with the full output. Here's the nuget process outp
       def no_nuget_dependencies
         @nuget_dependencies = false
       end
+      
+      # call this if you want to disable NuGet's package analysis
+      # when creating the nupkg file
+      def no_package_analysis
+        @package_analysis = false
+      end
 
       def nuget_gem_exe
         @exe = Albacore::Nugets::find_nuget_gem_exe
@@ -207,6 +215,7 @@ and report a bug to albacore with the full output. Here's the nuget process outp
           :configuration => @configuration,
           :project_dependencies => @project_dependencies,
           :nuget_dependencies => @nuget_dependencies,
+          :package_analysis => @package_analysis,
           :original_path => FileUtils.pwd,
           :leave_nuspec  => @leave_nuspec
         })
@@ -361,8 +370,9 @@ and report a bug to albacore with the full output. Here's the nuget process outp
         nuspec = path_to nuspec, cwd
         nuspec_symbols = path_to nuspec_symbols, cwd if nuspec_symbols
         cmd = Albacore::NugetsPack::Cmd.new exe,
-                work_dir: cwd,
-                out:      out
+                work_dir:         cwd,
+                out:              out,
+                package_analysis: @opts.get(:package_analysis)
 
         # run any concerns that modify the command
         @before_execute.call cmd if @before_execute
