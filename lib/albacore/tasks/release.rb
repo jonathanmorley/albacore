@@ -175,10 +175,9 @@ module Albacore
             clr_command: @opts.get(:clr_command)
           }
           @block.call(package) if @block
-          return package
+          package
         end
         
-        p packages
         @packages ||= packages
         @packages
       end
