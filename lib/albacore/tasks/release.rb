@@ -82,6 +82,7 @@ module Albacore
           end
 
           task :nuget_push => @opts.get(:depend_on) do
+            p packages
             packages.each do |package|
               nuget_push package
             end
@@ -165,7 +166,7 @@ module Albacore
         pathspec = "#{@opts.get :pkg_dir}/*.#{nuget_version}.nupkg"
         debug { "[release] looking for packages in #{pathspec}, version #{@semver}" }
         
-        packages = Dir.glob(pathspec).map do |path|
+        @packages ||= Dir.glob(pathspec).map do |path|
           id = /(?<id>.*)\.#{nuget_version}/.match(File.basename(path, '.nupkg'))[:id]
           package = {
             path: path,
@@ -178,7 +179,6 @@ module Albacore
           package
         end
         
-        @packages ||= packages
         @packages
       end
 
